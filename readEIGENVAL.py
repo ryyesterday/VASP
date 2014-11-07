@@ -20,7 +20,8 @@ eigenval.readline() # N/A
 eigenval.readline() # N/A
 eigenval.readline() # Cartesian/Direct
 
-name = eigenval.readline().rstrip() # System name w/ stripped newline char 
+# System name w/ stripped newline character
+name = eigenval.readline().rstrip() 
 print "# System:        " + name
 
 first = eigenval.readline() # Possibly interesting information
