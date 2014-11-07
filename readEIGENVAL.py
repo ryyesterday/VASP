@@ -1,11 +1,10 @@
 #!/usr/bin/python
 # Ryan Valenza
 # 2014-10-28
-# This program is the start of a project to create a series of
+# This script is the start of a project to create a series of
 # modules to interpret VASP outfiles.  The end goal is to be able
 # to quickly create plots and format data for external use.
 
-import string
 import sys
 import re
 import math
