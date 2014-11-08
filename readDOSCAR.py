@@ -16,7 +16,7 @@ import sys
 def readDOSCAR(filename):
 
 	doscar = open(filename,"r")
-	filename = filename.split("\\")[-1]
+	filename = filename.split('/')[-1]
 	# e.g. /home/ryval/DOSCAR, grab DOSCAR
 	print "# Filename:  " + filename
     
@@ -51,7 +51,7 @@ def readDOSCAR(filename):
 		ids.append(float(idos))
 
 	plt.subplot(2,1,1)		# The first subplot in the first figure
-	plt.plot(es,tds,'-')
+	plt.plot(es,tds,'-',label=filename)
 	plt.ylabel('Total DOS')
 
 	plt.subplot(2,1,2)		# The second subplot in the first figure
@@ -60,8 +60,8 @@ def readDOSCAR(filename):
 
 	plt.xlabel(r'$E - E_f$ (eV)')
 	plt.subplot(2,1,1) 		# Make first subplot current (for title)
-	plt.title(name + " Density of States")
-	
+	plt.title(name + " DOS")
+	plt.legend()
 	
 def main():
 
@@ -79,7 +79,7 @@ Example DOS-file:
 /path/to/DOSCAR2
 /path/to/DOSCAR3 
 	"""
-
+	
 	print # Buffer
 	plt.figure('Density of States', figsize = (10,10)) # Create figure 1
 	
