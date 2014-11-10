@@ -79,10 +79,13 @@ Example DOS-file:
 /path/to/DOSCAR2
 /path/to/DOSCAR3 
 	"""
-	
+
 	print # Buffer
 	plt.figure('Density of States', figsize = (10,10)) # Create figure 1
 	
+# Could use argparse if number of options increases
+# Ideas:  look for OUTCAR, find number of electrons
+#		  and plot a horizontal line @ that number
 	if sys.argv[1] == '-f':
 		filelist = open(sys.argv[2],"r")
 		for dosfile in filelist:
