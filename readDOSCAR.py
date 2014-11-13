@@ -46,9 +46,17 @@ def readDOSCAR(filename):
 	for i in range(int(ndos)):
 		line = doscar.readline()
 		(energy, tdos, idos) = line.split()
-		es.append(float(energy)-float(efermi))
-		tds.append(float(tdos))
-		ids.append(float(idos))
+		
+		try:
+			energy = float(energy)
+			tdos = float(tdos)
+			idos = float(idos)
+		except ValueError: # For when VASP misses the E in a float
+			continue
+		
+		tds.append(tdos)
+		es.append(energy-float(efermi))
+		ids.append(idos)
 
 	plt.subplot(2,1,1)		# The first subplot in the first figure
 	plt.plot(es,tds,'-',label=filename)
