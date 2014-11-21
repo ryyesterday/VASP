@@ -16,7 +16,7 @@ import sys
 def readDOSCAR(filename):
 
 	doscar = open(filename,"r")
-	filename = filename.split('/')[-1]
+	filename = filename.split("\\")[-1]
 	# e.g. /home/ryval/DOSCAR, grab DOSCAR
 	print "# Filename:  " + filename
     
