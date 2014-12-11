@@ -8,6 +8,7 @@
 # Imports
 from numpy import *
 import sys
+from sets import Set
 import time
 
 # Global Variables
@@ -38,25 +39,22 @@ class readGCOEFF:
 		self.data = []
 		self.big_data = []
 		
-		# prev, used to remove querying
+		# dictionary for h,k,l lookup, constant time
+		self.coefs = {}
+		self.big_coefs = []
+		self.G = Set()
+		
+		# prev, used to remove querying for n & k
 		self.prevN = 1
 		self.prevKx = 0
 		self.prevKy = 0
 		self.prevKz = 0
 		
 		# outfile and checks
-		self.out = open(OUTFILE,"w")
 		self.write_out = True
 		self.cartK = False
-	
-	
-	# segment numpy array given n & kx, ky, kz
-	def segment(self, n, kx, ky, kz):
-	
-		return self.data[logical_and(self.data[:,0] == n, 
-			logical_and(self.data[:,1] == kx,
-			logical_and(self.data[:,2] == ky,
-			self.data[:,3] == kz)))]
+		self.read = False
+		self.readH = False
 	
 	
 	# given a segmented data set, find a coefficient given G
@@ -74,29 +72,36 @@ class readGCOEFF:
 			# return [real, imag] PW coefficient
 			return [gc[0][7],gc[0][8]]
 		
-	
+		
 	# get structure factor, S(Q)
 	def __getSF(self, qx, qy, qz):
-		
-		qx = float(qx)
-		qy = float(qy)
-		qz = float(qz)
-		print "Finding structure factor for (%f, %f, %f)" % (qx, qy, qz)
+	
+		qx = int(qx)
+		qy = int(qy)
+		qz = int(qz)
 		
 		sf = [0,0]
 		
-		# loop through all possible n & k values
-		for seg in self.big_data:
-			coef = self.__findCoeff(seg, qx, qy, qz)
+		for coef in self.big_coefs:
+			for g in self.G:
 			
-			re = sum(coef[0]*seg[:,7] + coef[1]*seg[:,8])
-			im = sum(coef[0]*seg[:,8] - coef[1]*seg[:,7])
-			
-			sf[0] += re
-			sf[1] += im
-		
-		print sf
-		
+				gx = g[0]
+				gy = g[1]
+				gz = g[2]
+				
+				try:
+					c1 = coef['[%i,%i,%i]'%(gx,gy,gz)]
+					c2 = coef['[%i,%i,%i]'%(gx+qx,gy+qy,gz+qz)]
+				except KeyError:
+					continue
+				
+				# form real & imaginary part
+				re = c1[0]*c2[0] + c1[1]*c2[1]
+				im = c1[1]*c2[0] - c1[0]*c2[1]
+				sf[0] += re
+				sf[1] += im
+				
+		return sf
 		
 	# Read the header
 	def readHeader(self):
@@ -134,9 +139,11 @@ class readGCOEFF:
 			(g1, g2, g3, d1, re, d2, im, d3) = gline.split()
 			re = float(re)
 			im = float(im)
-			g1 = float(g1)
-			g2 = float(g2)
-			g3 = float(g3)
+			g1 = int(g1)
+			g2 = int(g2)
+			g3 = int(g3)
+			
+			self.G.add((g1,g2,g3))  # add to set of all G-values
 			
 			# if current = prev, append to existing dataset
 			if (self.prevKx == self.k1 and 
@@ -144,16 +151,26 @@ class readGCOEFF:
 				self.prevKz == self.k3 and
 				self.prevN == self.n):
 				
+				# save coefs in hash table for structure factor
+				self.coefs['[%i,%i,%i]'%(g1,g2,g3)] = [re,im]
+				
 				# save data to list for future
 				self.data.append([self.n,		# band number
 					self.k1,self.k2,self.k3,	# k-pt
 					g1,g2,g3,					# G-pt
 					re,im,						# PW coefficient
 					self.energy])				# energy
+					
 			# else, append current dataset to master set
 			else:
+				# for the large datasets
 				self.big_data.append(array(self.data, dtype='f'))
+				self.big_coefs.append(self.coefs)
+					
 				# first entry in new dataset
+				self.coefs = {}
+				self.coefs['[%i,%i,%i]'%(g1,g2,g3)] = [re,im]
+				
 				self.data = []
 				self.data.append([self.n,
 					self.k1,self.k2,self.k3,
@@ -224,9 +241,15 @@ class readGCOEFF:
 		
 	# Read the entire file
 	def readFile(self):
-
-		self.readHeader()
-
+		
+		if self.readH == False:
+			self.readHeader()
+			self.readH = True
+			
+		# open outfile
+		if self.write_out == True:
+			self.out = open(OUTFILE,"w")
+			
 		print "Cleaning data..."
 		nks = self.nkpts
 		while nks >= 1:
@@ -249,22 +272,33 @@ class readGCOEFF:
 		# close outfile
 		if self.write_out == True:
 			self.out.close()
-
+		
+		self.read = True
 			
 	# form the structure factor, output to file
 	def writeSF(self):
 		
-		self.readFile()
+		if self.read == False:
+			self.readFile()
+			self.read = True
+		sffile = open(SFFILE,"w")
+		print "Writing structure factors..."
+		
 		for h in range(-5,6,1):
 			for k in range(-5,6,1):
 				for l in range(-5,6,1):
-					self.__getSF(h,k,l)
-		self.__getSF(1,1,1)
+					coef = self.__getSF(h,k,l)
+					sffile.write("%i, %i, %i, %f, %f\n" %(h,k,l,coef[0],coef[1]))
+
+		sffile.close()
 		
 	# print out the square of the wavefunctions
 	def norm(self):
 	
-		self.readFile()
+		if self.read == False:
+			self.readFile()
+			self.read = True
+			
 		for seg in self.big_data:
 			n = sum(seg[:,7]**2 + seg[:,8]**2)
 			print "%f {%f, %f, %f}:  %f" % (
@@ -275,10 +309,13 @@ class readGCOEFF:
 
 def main():
 
-	start = time.time()		
-
 	filename = sys.argv[1]
 	obj = readGCOEFF(filename)
+	obj.write_out = False
+	obj.readFile()
+
+	start = time.time()		
+
 	obj.writeSF()
 	
 	end = time.time()
