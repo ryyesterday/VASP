@@ -1,0 +1,67 @@
+\documentclass[notitlepage,letter,preprint,prb]{revtex4}
+	
+		\usepackage{amsfonts}
+		\usepackage{amssymb}
+		\usepackage{amsmath}
+		\usepackage{overcite}
+		\usepackage{graphicx}
+		\usepackage{longtable}
+		\usepackage{bm}
+		\usepackage{braket}
+
+		\newenvironment{anb}
+		  {\par\nobreak\vfil\penalty0\vfilneg
+		   \vtop\bgroup}
+		  {\par\xdef\tpd{\the\prevdepth}\egroup
+		   \prevdepth=\tpd}
+		   
+\begin{document}
+\begin{anb}
+	\title{Structure Factor: Fast Fourier Transform}
+	\author{Ryan A. Valenza}
+	\affiliation{Department of Physics, University of Washington, \\
+	Seattle, Washington 98195-1560, USA}
+\nopagebreak
+
+\begin{abstract}
+	Given the charge density, $\rho(\vec{r})$, as a grid of points in the lattice vector basis, how can a discrete Fourier transform give us the structure factor that is immediately in a grid indexed by the miller plane values $\{h,k,l\}$.
+\end{abstract}
+\maketitle 
+
+\section{General Form of DFT}
+	First we need to understand the general form of the discrete Fourier transform.  
+	
+	\begin{equation}
+	A_p = \sum_{m=0}^{n-1}a_m\ \mathrm{exp}\{-2\pi i \frac{m p}{n}\}    
+	\end{equation}
+	
+	Here, $A_p$ represents the result and $a_m$ is our data.
+
+	\begin{itemize}
+	\item $m$:  indexes the data we have
+	\item $p$:  indexes the result of the DFT
+	\item $n$:  the size of the dataset 
+	\end{itemize}
+\end{anb}
+	So, we want $p\rightarrow\{h,k,l\} \in \mathbb{Z}$ and $m\rightarrow\{\frac{c}{n_x},\frac{d}{n_y},\frac{f}{n_z}\}$ for $\{c,d,f\} \in \mathbb{Z}$.  This is because we know the structure factor is evaluated at a reciprocal lattice point $\vec{Q} = h\vec{b}_1 + k\vec{b}_2 + l\vec{b}_3$ and we can write $\vec{r}=\frac{c}{n_x}\vec{a}_1+\frac{d}{n_y}\vec{a}_2+\frac{f}{n_z}\vec{a}_3$.  $\vec{r}$ is written in this way because our data, $\rho(\vec{r})$, is given on a grid that splices the unit cell in the $\{\vec{a}_1,\vec{a}_2,\vec{a}_3\}$ basis.  The grid has dimensions of $n_x\ \mathrm{x}\ n_y\ \mathrm{x}\ n_z$.  Thus, for integers $\{c,d,f\}$, the radial vector in the above form can reach every data point within our unit cell.  This is why, in direct coordinates, the data is within a unit cube.  
+	
+\section{Structure Factor}
+	The structure factor is the Fourier transform of the real space charge density.  One can invoke lattice symmetry to convert the integral over all space into an integral over the unit cell, times an inverse volume factor. This integral must then be approximated as a sum due to the discrete nature of our sampling.    
+	
+	\begin{align}
+	S(\vec{Q}) &= \frac{1}{V}\int_{\mathrm{unit}} \mathrm{d}^{3}r\ \rho(\vec{r})\  \mathrm{exp}\{{-i\vec{Q}\cdot{\vec{r}}\}} \nonumber \\
+	&\approxeq
+	\sum_{\mathrm{data}}\rho(\vec{r})\ \mathrm{exp}\{-i\vec{Q}\cdot\vec{r}\} \nonumber\\
+	&= \sum_{c,d,f}\rho_{c,d,f}\ \mathrm{exp}\{-i(h\vec{b}_1 + k\vec{b}_2 + l\vec{b}_3)\cdot(\frac{c}{n_x}\vec{a}_1+\frac{d}{n_y}\vec{a}_2+\frac{f}{n_z}\vec{a}_3)\} \nonumber
+	\end{align}
+	
+	Recall $\vec{b}_i \cdot \vec{a}_j = 2\pi\delta_{ij}$.
+	
+	\begin{equation}
+	S_{h,k,l} = {\sum_{c=0}^{n_x-1}}{\sum_{d=0}^{n_y-1}}{\sum_{f=0}^{n_z-1}}\rho_{c,d,f}\ \mathrm{exp}\{-2\pi i(\frac{hc}{n_x}+\frac{kd}{n_y}+\frac{lf}{n_z})\}
+	\end{equation}
+	
+	Comparing equations (2) and (1), we see that the structure factor, taken as the FFT of the real space charge density, is immediately indexed by the miller plane ${h,k,l}$.  
+	
+\end{document}
+

@@ -1,0 +1,60 @@
+\documentclass[notitlepage,letter,preprint,prb]{revtex4}
+	
+		\usepackage{amsfonts}
+		\usepackage{amssymb}
+		\usepackage{amsmath}
+		\usepackage{overcite}
+		\usepackage{graphicx}
+		\usepackage{longtable}
+		\usepackage{bm}
+		\usepackage{braket}
+
+\begin{document}
+
+	\title{Structure Factor: Plane Wave Expansion}
+	\author{Ryan A. Valenza}
+	\affiliation{Department of Physics, University of Washington, \\
+	Seattle, Washington 98195-1560, USA}
+\nopagebreak
+\begin{abstract}
+	Given a list of plane wave coefficients in Fourier space, how can we reconstruct the wavefunction, the charge density, and the structure factor.
+\end{abstract}
+\maketitle 
+
+\section{Electronic Wavefunctions}
+	The solution is in Bloch's theorem, where we can write a single-electron wavefunction as
+	\begin{equation}
+	\psi_{n,k}(\vec{r}) = u_{n,k}(\vec{r})e^{i\vec{k}\cdot\vec{r}}
+	\end{equation}
+	
+	The Bloch waves, $u_{n,k}(\vec{r})$, have the symmetry of the lattice.  We can expand them in a plane wave basis, essentially taking the discrete Fourier transform.  This allows us to write the wavefunction in terms of plane wave coefficients.
+	
+	\begin{equation}
+	\psi_{n,k}(\vec{r}) = \sum_{\vec{G'}}C_{n,k}(\vec{G'})e^{i(\vec{k}+\vec{G'})\cdot\vec{r}}
+	\end{equation}
+
+\section{Real Space Charge Density}
+	The assumption that goes into forming the charge density, $\rho(\vec{r})$, is that the wavefunctions for electrons of different bands do not interfere - they are separable.  This is a direct result of the wavefunctions being solutions to the Hartree-Fock equations.  
+	
+	\begin{align}
+	\rho(\vec{r}) &= \sum_{n,k}|{\psi_{n,k}(\vec{r})}|^2 \nonumber \\
+	&= \sum_{n,k}[\sum_{\vec{G'}}C_{n,k}(\vec{G'})e^{i(\vec{k}+\vec{G'})\cdot\vec{r}}][\sum_{\vec{G}}C^{*}_{n,k}(\vec{G})e^{-i(\vec{k}+\vec{G})\cdot\vec{r}}] \nonumber \\
+	&= \sum_{n,k}\sum_{\vec{G'},\vec{G}}C_{n,k}(\vec{G'})C^{*}_{n,k}(\vec{G})e^{i(\vec{G'}-\vec{G})\cdot\vec{r}}
+	\end{align}
+	   
+\section{Structure Factor}
+	The structure factor is the Fourier transform of the real space charge density.  
+	
+	\begin{align}
+	S(\vec{Q}) &= \int \mathrm{d}^{3}r\ \rho(\vec{r}) e^{-i(\vec{Q}\cdot{\vec{r})}} \nonumber \\
+	&=
+	\sum_{n,k}\sum_{\vec{G'},\vec{G}}C_{n,k}(\vec{G'})C^{*}_{n,k}(\vec{G})\int \mathrm{d}^{3}r\ e^{i(\vec{G'}-\vec{G}-\vec{Q})\cdot\vec{r}} \nonumber\\
+	&= \frac{1}{{(2\pi)^3}}\sum_{n,k}\sum_{\vec{G'},\vec{G}}C_{n,k}(\vec{G'})C^{*}_{n,k}(\vec{G}) \delta^{3}(\vec{G'}-\vec{G}-\vec{Q}) \nonumber\\
+	&\propto\sum_{n,k}\sum_{\vec{G}}C_{n,k}(\vec{Q}+\vec{G})C^{*}_{n,k}(\vec{G})
+	\end{align}
+	
+	The delta function collapses one of the sums over reciprocal lattice vector.  Thus, the structure factor can be represented (up to factors of $2\pi$ and the unit cell volume) by a simple sum over plane wave coefficients.  This sum is a convolution in Fourier space.  
+	
+	
+\end{document}
+
