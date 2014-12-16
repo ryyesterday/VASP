@@ -24,3 +24,5 @@ This script reads in VASP's EIGENVAL file and obtains a data set of {Energy, k-p
 ### readDOSCAR.py
 
 This script reads in VASP's DOSCAR file for a non spin-polarized calculation and plots the DOS and the integrated-DOS using matplotlib.  
+
+# Author:  Ryan Valenza
