@@ -1,8 +1,9 @@
 import numpy
 
+
 HLINES = 10
 CHGCAR = open("CHGCAR_sum","r")
-OUTFILE = open("STRFAC.out","w")
+OUTFILE = open("STRFAC.txt","w")
 
 # read the header
 i = HLINES
@@ -16,7 +17,7 @@ ny = int(ny)
 nz = int(nz)
 
 a = numpy.loadtxt(CHGCAR)
-b = a.reshape(a.shape[0]*a.shape[1])
+b = a.reshape(nx*ny*nz)
 c = b.reshape((nx,ny,nz),order = 'F')
 d = numpy.fft.fftn(c)/(nx*ny*nz)
 
