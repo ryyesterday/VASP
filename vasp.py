@@ -33,8 +33,9 @@ class vasp:
 		
 		# default filenames, can be overwritten
 		self.chgcarf = "CHGCAR_sum"
-		self.outfile = "PY_STRFAC.txt"
+		self.sff = "PY_STRFAC.txt"
 		
+	# reads a VASP CHGCAR file and grabs the charge and SF
 	def readCHGCAR(self):
 		
 		# open the file and read the header
@@ -54,7 +55,8 @@ class vasp:
 		a3 = self.chgcar.readline().split()
 		a3 = np.array([float(i)*self.lc for i in a3])
 		self.A = np.array([a1,a2,a3], dtype = 'f8')
-		
+		self.findB(self.A) # find reciprocal vectors
+		print self.B
 		# atoms
 		self.atoms = self.chgcar.readline().split()
 		self.atoms[-1] = self.atoms[-1].strip()
@@ -91,9 +93,10 @@ class vasp:
 		self.rho = b.reshape((nx,ny,nz),order = 'F')
 		self.SF = np.fft.fftn(self.rho)/(nx*ny*nz) # structure factor
 
+	# creates an outfile of SF at a given miller index
 	def writeSF(self):
 	
-		out = open(self.dir + self.outfile,"w")
+		out = open(self.dir + self.sff,"w")
 		print "Writing SFs for %s..."%self.system
 		for h in range(-H_MIN,H_MAX + 1,1):
 			for k in range(-K_MIN,K_MAX + 1,1):
@@ -105,49 +108,29 @@ class vasp:
 		
 		out.close()
 		
+	# find the reciprocal lattice vectors
+	def findB(self, A):
+		
+		a1 = A[0];
+		a2 = A[1];
+		a3 = A[2];
+		vol = np.dot(a1,np.cross(a2,a3))
+		
+		b1 = 2*math.pi*(np.cross(a2,a3)/vol)
+		b2 = 2*math.pi*(np.cross(a3,a1)/vol)
+		b3 = 2*math.pi*(np.cross(a1,a2)/vol)
+		self.B = np.array([b1,b2,b3],dtype='f8')
+		
+	#def getPeaks(self):
+		
+		
+		
+		
+		
 def main():
-	LiF0 = vasp("E:\\Real Space Charge Density\\LiF\\0\\")
-	LiF0.readCHGCAR()
-	LiF0.writeSF()
-
-	LiF1 = vasp("E:\\Real Space Charge Density\\LiF\\1\\")
-	LiF1.readCHGCAR()
-	LiF1.writeSF()
-
-	LiF2 = vasp("E:\\Real Space Charge Density\\LiF\\2\\")
-	LiF2.readCHGCAR()
-	LiF2.writeSF()
-
-	LiF3 = vasp("E:\\Real Space Charge Density\\LiF\\3\\")
-	LiF3.readCHGCAR()
-	LiF3.writeSF()
 	
-	LiF4 = vasp("E:\\Real Space Charge Density\\LiF\\4\\")
-	LiF4.readCHGCAR()
-	LiF4.writeSF()
-	
-	LiF5 = vasp("E:\\Real Space Charge Density\\LiF\\5\\")
-	LiF5.readCHGCAR()
-	LiF5.writeSF()
-	
-	LiF6 = vasp("E:\\Real Space Charge Density\\LiF\\6\\")
-	LiF6.readCHGCAR()
-	LiF6.writeSF()
-	
-	LiF7 = vasp("E:\\Real Space Charge Density\\LiF\\7\\")
-	LiF7.readCHGCAR()
-	LiF7.writeSF()	
-	
-	LiF8 = vasp("E:\\Real Space Charge Density\\LiF\\8\\")
-	LiF8.readCHGCAR()
-	LiF8.writeSF()
-	
-	LiF9 = vasp("E:\\Real Space Charge Density\\LiF\\9\\")
-	LiF9.readCHGCAR()
-	LiF9.writeSF()
-	
-	LiF10 = vasp("E:\\Real Space Charge Density\\LiF\\10\\")
-	LiF10.readCHGCAR()
-	LiF10.writeSF()
+	LiF30 = vasp("E:\\WDC\\LiF\\30\\")
+	LiF30.readCHGCAR()
+	LiF30.writeSF()
 	
 main()
