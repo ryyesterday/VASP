@@ -8,14 +8,8 @@
 # Imports
 import numpy as np
 import math
-from scipy import constants
 
 # Globals
-HBAR = constants.physical_constants['Planck constant over 2 pi in eV s'][0]
-C = constants.physical_constants['speed of light in vacuum'][0]
-E0 = 10e3 
-LAMBDA = (2*math.pi*HBAR*C/E0)*1e10
-GAMMA = LAMBDA/(4*math.pi)
 H_MIN = 6
 H_MAX = 6
 K_MIN = 6
@@ -26,6 +20,7 @@ L_MAX = 6
 # VASP class whose objects are individual VASP runs
 class vasp:
 
+	# initialize the vasp run object
 	def __init__(self, dir):
 		
 		# directory where VASP outfiles are kept
@@ -33,6 +28,8 @@ class vasp:
 		
 		# default filenames, can be overwritten
 		self.chgcarf = "CHGCAR_sum"
+		self.outcarf = "OUTCAR"
+		self.occf = "OCC.txt"
 		self.sff = "PY_STRFAC.txt"
 		
 	# reads a VASP CHGCAR file and grabs the charge and SF
@@ -56,7 +53,7 @@ class vasp:
 		a3 = np.array([float(i)*self.lc for i in a3])
 		self.A = np.array([a1,a2,a3], dtype = 'f8')
 		self.findB(self.A) # find reciprocal vectors
-		print self.B
+		
 		# atoms
 		self.atoms = self.chgcar.readline().split()
 		self.atoms[-1] = self.atoms[-1].strip()
@@ -88,11 +85,37 @@ class vasp:
 		self.grid = [nx,ny,nz]
 		
 		# the charge density, column-major order	
+		extra = (nx*ny*nz % 5) # VASP requires 5 nums per line
 		a = np.loadtxt(self.chgcar)
-		b = a.reshape(nx*ny*nz) # flatten array		
+		b = a.reshape(nx*ny*nz + extra) # flatten array	
+		if extra != 0:
+			extra -= 5
+			b = np.delete(b,np.s_[nx*ny*nz:nx*ny*nz+extra])
 		self.rho = b.reshape((nx,ny,nz),order = 'F')
 		self.SF = np.fft.fftn(self.rho)/(nx*ny*nz) # structure factor
 
+	# reads a VASP OUTCAR file and finds gamma pt occupation
+	def getOCC(self):
+		
+		# open the file and loop through until line match
+		self.outcar = open(self.dir + self.outcarf, "r")
+		self.occ = open(self.dir + self.occf, "w")
+		
+		first = True
+		gamma = False
+		
+		print "Finding gamma point occupation..."
+		while True:
+			line = self.outcar.readline()
+			if line == " k-point     1 :       0.0000    0.0000    0.0000\n":
+				break
+		self.outcar.readline() # skip header
+		while True:
+			line = self.outcar.readline()
+			if line == "\n":
+				break
+			self.occ.write(line)
+				
 	# creates an outfile of SF at a given miller index
 	def writeSF(self):
 	
@@ -121,16 +144,16 @@ class vasp:
 		b3 = 2*math.pi*(np.cross(a1,a2)/vol)
 		self.B = np.array([b1,b2,b3],dtype='f8')
 		
-	#def getPeaks(self):
-		
-		
-		
-		
-		
-def main():
 	
-	LiF30 = vasp("E:\\WDC\\LiF\\30\\")
-	LiF30.readCHGCAR()
-	LiF30.writeSF()
+		
+		
+# use the class
+def main():
+
+	
+	C0 = vasp("E:\\WDC\\Graphite\\0\\")
+	#C3.readCHGCAR()
+	#C3.writeSF()
+	C0.getOCC()
 	
 main()
