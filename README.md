@@ -9,7 +9,7 @@ Currently this project contains the following scripts:
 - readDOSCAR.py
 
 
-### readCHGCAR.py
+### vasp.py & readCHGCAR.py
 
 This is the current method I'm using to obtain the structure factor from the charge density that VASP outputs in CHGCAR.  Beware that VASP only outputs the valence charge density, so to obtain the core run VASP with the option LAECHG = .TRUE. in INCAR.  This will create the files AECCAR0, containing the core, and AECCAR2, containing the valence.  Sum them to obtain the total density.  This density is read into readCHGCAR.py as a numpy array in column-major order (VASP's default for writing 3D arrays).  A discrete Fourier transform is performed and the result is a 3D array where the index {h,k,l} corresponds to a miller plane.  See the LaTeX document "Structure Factor FFT" for explanations of the theory.  
 
