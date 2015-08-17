@@ -3,6 +3,7 @@ VASP
 This project's goal is to use VASP to study the real space charge density upon electronic heating by an x-ray pulse.  It is also desirable to obtain the structure factor (the Fourier transform of the charge density) and create diffraction patterns that can be compared with experimental data acquired from synchrotrons.  During the project, I also became interested in understanding plane wave expansions, band structure calculations, Fermi-Dirac statistics, and other things involved in Density Functional Theory.  Here are a collection of my scripts and LaTeX documents for this project.
 
 Currently this project contains the following scripts:
+- vasp.py
 - readCHGCAR.py
 - readGCOEFF.py
 - readEIGENVAL.py
