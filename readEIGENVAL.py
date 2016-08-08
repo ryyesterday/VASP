@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # Ryan Valenza
 # 2014-10-28
+# Mod 2016-08-08 MWistey: fix regexp, replace eval->enval
 # This script is the start of a project to create a series of
 # modules to interpret VASP outfiles.  The end goal is to be able
 # to quickly create plots and format data for external use.
@@ -32,7 +33,7 @@ print "# of bands:      " + nbands
 # Regular expressions are used to distinguish between a k-point and an eigenvalue
 regexs = {
 'kpt': "\s+(.\d+\.\d+E[+-]\d+)\s+(.\d+\.\d+E[+-]\d+)\s+(.\d+\.\d+E[+-]\d+)\s+.*",
-'eval': "\s+(\d+)\s+(.\d+.\d+)" }
+'enval': "\s+(\d+)\s+(-?.\d+\.\d+)" }
 
 kpts = []
 bands = []
@@ -43,15 +44,15 @@ j = 0 # mark band number
 print "Finding k-point, energy pairs for each band..."
 for line in eigenval:
 	kpt = re.match(regexs['kpt'], line)
-	eval = re.match(regexs['eval'], line)
+	enval = re.match(regexs['enval'], line)
 
 	if kpt != None:
 		(kx,ky,kz) = kpt.groups()
 		k = math.sqrt(float(kx)**2 + float(ky)**2 + float(kz)**2)
 		k = k
 		
-	if eval != None:
-		e = float(eval.groups(0)[1])
+	if enval != None:
+		e = float(enval.groups(0)[1])
 		bands[j%int(nbands)].append([k,e])
 		j += 1
 
