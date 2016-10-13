@@ -38,7 +38,7 @@ regexs = {
 kpts = []
 bands = []
 for i in range(int(nbands)):
-	bands.append([]) # lists are immutable
+	bands.append([]) 
 j = 0 # mark band number
 
 print "Finding k-point, energy pairs for each band..."
